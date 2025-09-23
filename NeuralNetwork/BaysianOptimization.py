@@ -1,0 +1,125 @@
+import optuna
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping
+import pandas as pd
+import numpy as np
+import random
+import sys
+
+# Lower Validation Loss
+lower_val_loss = None
+
+# Counter
+trial_counter = 0
+
+# Redirect stdout to a file
+log_file = open("bayesian_optimization_log.txt", "w")
+sys.stdout = log_file
+
+# Load and preprocess data
+df = pd.read_csv('./data/RMSE_10inps.csv', index_col=False)
+#df = df.drop('Hash', axis=1)
+X = df.iloc[:, :-1]
+y = df.iloc[:, -1]
+
+#scaler = StandardScaler()
+#X_scaled = scaler.fit_transform(X)
+
+X_train, _, y_train, _ = train_test_split(X, y, test_size=0.1, random_state=42)
+
+print("============================================")
+
+# Objective function for Optuna
+def objective(trial):
+    
+    print("============================================")
+    save_model = False
+    
+    global trial_counter, lower_val_loss
+    print(f"Trial Number: {trial_counter}")
+    
+    # Suggest hyperparameters
+    n_layers = trial.suggest_int("n_layers", 1, 4)
+    #n_layers = trial.suggest_int("n_layers", 1, 2)
+    units = []
+    for _ in range(n_layers):
+        #unit = trial.suggest_int("units", 1, 16)
+        #unit = trial.suggest_int("units", 1, 2)
+        unit = random.randint(1, 16)
+        units.append(unit)
+    print(f"Neural Network Shape: {units}")
+    
+    learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True)
+    print(f"Learning Rate: {learning_rate}")
+    
+    n_epochs = trial.suggest_int("n_epochs", 10, 50)
+    print(f"Number of epochs: {n_epochs}")
+    
+    #n_batch_size = random.choice([2, 4, 8, 16, 32, 64, 128])
+    n_batch_size = trial.suggest_categorical("n_batch_size", [8, 16, 32, 64, 128, 256])
+    print(f"Batch size: {n_batch_size}")
+
+    model = Sequential()
+    model.add(Input(shape=(X.shape[1],)))
+    model.add(Dense(units[0], activation='relu'))
+    i = 1
+    for _ in range(n_layers - 1):
+        model.add(Dense(units[i], activation='relu'))
+        i += 1
+    model.add(Dense(1, activation='linear'))
+
+    optimizer = Adam(learning_rate=learning_rate)
+    model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mae'])
+    
+    # Stop the model early if the validation loss start to increase
+    early_stop = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+    
+    history = model.fit(
+        X_train, y_train,
+        validation_split=0.1,
+        epochs=n_epochs,
+        batch_size=n_batch_size,
+        shuffle=True,
+        callbacks=[early_stop],
+        verbose=0
+    )
+
+    val_loss = history.history['val_loss'][-1]
+    print(f"Validation Loss: {val_loss}")
+    
+    # Set the first Validation Loss as the lower_val_loss
+    if trial_counter == 0:
+        lower_val_loss = val_loss
+        save_model = True
+        
+    # Check if the val_loss is lower than the lower_val_loss
+    if val_loss < lower_val_loss:
+        lower_val_loss = val_loss
+        save_model = True
+        
+    # Save the model   
+    if save_model == True:
+        model.save(f"TOPSIS_NN_OUTPUT.keras")
+    
+    trial_counter += 1
+    
+    print("============================================")
+    
+    return val_loss
+
+# Run Bayesian Optimization
+study = optuna.create_study(direction='minimize')
+study.optimize(objective, n_trials=100)
+
+print("\nBest hyperparameters:")
+print(study.best_params)
+
+# Close the log file
+log_file.close()
+
+# Restore stdout
+sys.stdout = sys.__stdout__
