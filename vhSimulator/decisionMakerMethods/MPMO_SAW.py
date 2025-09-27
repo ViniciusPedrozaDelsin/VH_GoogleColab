@@ -29,8 +29,6 @@ class MPMO_SAW(DMM):
             self.output = self.makeDecisionTimeToTrigger()
         else:
             self.output = self.decisionProcedure()
-            
-        self.output = self.return_output()
         self.old_decision = self.output['Network']
         return self.output
     
@@ -92,10 +90,6 @@ class MPMO_SAW(DMM):
                     if value < max_min_parameter:
                         max_min_parameter = value
                 j = j + 1
-            
-            e = 0.000001
-            if max_min_parameter == 0:
-                max_min_parameter += e
                 
             for value in attribute_dict[parameter]:
                 new_value = value/max_min_parameter

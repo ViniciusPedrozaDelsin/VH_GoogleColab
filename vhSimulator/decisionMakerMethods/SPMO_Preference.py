@@ -8,9 +8,6 @@ class SPMO_Preference(DMM):
     
     def makeDecision(self):
         self.output = self.OrderAvailableNetworks()[0]
-        
-        self.output = self.return_output()
-        self.old_decision = self.output['Network']
         return self.output
     
     def OrderAvailableNetworks(self):

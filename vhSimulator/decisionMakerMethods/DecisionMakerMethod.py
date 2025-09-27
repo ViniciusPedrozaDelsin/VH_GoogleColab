@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import hashlib
-import copy
+
 
 class DecisionMakerMethod:
 
@@ -9,60 +9,11 @@ class DecisionMakerMethod:
         self.method_name = method_name
         self.file_to_save = file_to_save
         self.inputs = None
-        self.inputs_bkp = None
         self.output = None
         self.old_decision = None
-        self.hp = None
-    
-    def resetParameters(self):
-        self.inputs = None
-        self.inputs_bkp = None
-        self.output = None
-        self.old_decision = None
-        self.hp = None
         
-    def send_inputs(self, inputs, hp=False):
-        self.hp = hp
-        if self.hp:
-            self.inputs_bkp = copy.deepcopy(inputs) 
-            #print("==================== INP BKP 1 ====================")
-            #print(self.inputs_bkp)
-            #print("=================================================")
-            if self.old_decision != None:
-                for input in inputs:
-                    if input['Network'] != self.old_decision:
-                        input['Delay'] = 1.2
-                        input['Jitter'] = 0.6
-                        input['HC'] = 1
-                #print("==================================== Inputs ====================================")        
-                self.inputs = inputs
-                #print(self.inputs)
-                #print("==================================== '' ====================================")
-            else:
-                self.inputs = inputs
-        else:
-            self.inputs = inputs
-    
-    def return_output(self):
-        if self.hp:
-            final_output = next((inp for inp in self.inputs_bkp if inp['Network'] == self.output['Network']), None)
-            
-            #print("==================== INP BKP 1 ====================")
-            #print(self.inputs_bkp)
-            #print("=================================================")
-            
-            if self.old_decision != None:
-                if final_output['Network'] != self.old_decision:
-                    final_output['HC'] = 1
-                    
-            #print("==================== INP BKP 2 ====================")
-            #print(self.old_decision)
-            #print(final_output)
-            #print("=================================================")
-        else:
-            final_output = self.output
-        self.inputs = self.inputs_bkp
-        return final_output
+    def send_inputs(self, inputs):
+        self.inputs = inputs
     
     def create_unique_id(*args):
         # Combine all inputs into a single string
@@ -74,7 +25,7 @@ class DecisionMakerMethod:
         #print(outputs)
         
         # Fields to normalize
-        fields = ['RSSI', 'SNR', 'BER', 'FEC', 'Throughput', 'PC', 'MC', 'Delay', 'Jitter', 'HC']
+        fields = ['RSSI', 'SNR', 'BER', 'FEC', 'Throughput', 'PC', 'MC']
 
         # Compute min and max for each field
         mins = {field: min(d[field] for d in self.inputs) for field in fields}
@@ -111,9 +62,6 @@ class DecisionMakerMethod:
                     #input_network['Protocol'], 
                     input_network['PC'], 
                     input_network['MC'], 
-                    input_network['Delay'],
-                    input_network['Jitter'],
-                    input_network['HC'],
                     outputs[i]
                 ]
             )

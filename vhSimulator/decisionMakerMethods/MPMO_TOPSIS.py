@@ -31,8 +31,6 @@ class MPMO_TOPSIS(DMM):
             self.makeDecisionTimeToTrigger()
         else:
             self.output = self.decisionProcedure()
-            
-        self.output = self.return_output()
         self.old_decision = self.output['Network']
         return self.output
     
@@ -76,17 +74,12 @@ class MPMO_TOPSIS(DMM):
             input_list = []
             for attribute in self.attributes:
                 input_list.append(input[attribute])
-            attributes_matrix.append(input_list)
+            attributes_matrix.append(input_list)  
         return np.array(attributes_matrix, dtype=float)
     
     
-    def NormalizeAttributesMatrix(self):
-        dem = np.sqrt((self.attributes_matrix ** 2).sum(axis=0))
-        
-        # Replace zeros with ones
-        dem[dem == 0] = 1
-        
-        norm_matrix = self.attributes_matrix / dem
+    def NormalizeAttributesMatrix(self):        
+        norm_matrix = self.attributes_matrix / np.sqrt((self.attributes_matrix ** 2).sum(axis=0))
         return norm_matrix
     
     
@@ -118,13 +111,12 @@ class MPMO_TOPSIS(DMM):
 
         # Calculate relative closeness to ideal solution
         if np.all(dist_ideal == 0) and np.all(dist_negative_ideal == 0):
-            closeness_coefficient = [1]
+            closeness_coefficient = 1
         else:
             closeness_coefficient = dist_negative_ideal / (dist_ideal + dist_negative_ideal)
         
         # Save data into .CSV
-        if self.file_to_save != None:
-            self.saveData(closeness_coefficient)
+        if self.file_to_save != None: self.saveData(closeness_coefficient)
         
         # Rank alternatives (higher is better)
         # Get the index of the max value

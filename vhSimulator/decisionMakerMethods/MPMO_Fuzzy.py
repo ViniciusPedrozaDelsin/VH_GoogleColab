@@ -30,8 +30,6 @@ class MPMO_Fuzzy(DMM):
             self.makeDecisionTimeToTrigger()
         else:
             self.output = self.decisionProcedure()
-            
-        self.output = self.return_output()
         self.old_decision = self.output['Network']
         return self.output
     

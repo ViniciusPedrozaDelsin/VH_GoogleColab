@@ -11,9 +11,6 @@ class SPMO_Max_Min_Method(DMM):
             self.output = self.get_maximum_value()
         else:
             self.output = self.get_minimum_value()
-            
-        self.output = self.return_output()
-        self.old_decision = self.output['Network']
         return self.output
     
     def get_maximum_value(self):

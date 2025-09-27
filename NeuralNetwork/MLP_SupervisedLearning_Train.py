@@ -3,11 +3,11 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from tensorflow.keras.models import Sequential
-from tensorflow.keras import layers
+from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
-df = pd.read_csv('./data/TOPSIS_10inps.csv', index_col=False)
+df = pd.read_csv('./data/TOPSIS.csv', index_col=False)
 df = df.drop('Hash', axis=1)
 
 # All columns except the last
@@ -17,22 +17,17 @@ df_features = df.iloc[:, :-1]
 df_target = df.iloc[:, -1]
 
 # Split into train/test sets
-X_train, X_test, y_train, y_test = train_test_split(df_features, df_target, test_size=0.1, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(df_features, df_target, test_size=0.2, random_state=42)
 
 # Build the model
 model = Sequential([
-    layers.Dense(10, input_shape=(df_features.shape[1],), activation='relu'),
-    #layers.Dropout(0.2),
-    #layers.Dropout(0.5),
-    layers.Dense(20, activation='relu'),
-    #layers.Dropout(0.5),
-    layers.Dense(10, activation='relu'),
-    #layers.Dropout(0.2),
-    layers.Dense(1, activation='linear')
+    Dense(1, input_shape=(df_features.shape[1],), activation='relu'),
+    Dense(1, activation='relu'),
+    Dense(1, activation='linear')
 ])
 
 # Compile the model
-model.compile(optimizer=Adam(learning_rate=0.0002), loss='mean_squared_error', metrics=['mae'])
+model.compile(optimizer=Adam(learning_rate=0.00013499688839335256), loss='mean_squared_error', metrics=['mae'])
 
 # Stop the model early if the validation loss start to increase
 early_stop = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
@@ -41,8 +36,8 @@ early_stop = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=
 history = model.fit(
     X_train, y_train,
     validation_split=0.1,
-    epochs=20,
-    batch_size=32,
+    epochs=27,
+    batch_size=4,
     shuffle=True,
     callbacks=[early_stop],
     verbose=1
@@ -60,6 +55,7 @@ print("====================")
 
 # Predict
 y_pred = model.predict(X_test)
+
 print("Predictions vs Actual:")
 for pred, actual in zip(y_pred.flatten(), y_test.to_numpy().flatten()):
     print(f"Predicted: {pred:.4f} | Actual: {actual:.4f}")

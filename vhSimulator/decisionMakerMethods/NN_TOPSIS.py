@@ -25,9 +25,6 @@ class NN_TOPSIS(DMM):
             self.makeDecisionTimeToTrigger()
         else:
             self.output = self.decisionProcedure()
-        
-        self.output = self.return_output()
-        self.old_decision = self.output['Network']
         return self.output
     
     
@@ -53,7 +50,7 @@ class NN_TOPSIS(DMM):
         
     def normalizeInputs(self):
         # Fields to Normalize
-        fields = ['RSSI', 'SNR', 'BER', 'FEC', 'Throughput', 'PC', 'MC', 'Delay', 'Jitter', 'HC']
+        fields = ['RSSI', 'SNR', 'BER', 'FEC', 'Throughput', 'PC', 'MC']
 
         # Compute min and max for each field
         mins = {field: min(d[field] for d in self.inputs) for field in fields}
@@ -93,10 +90,7 @@ class NN_TOPSIS(DMM):
                 'BER': inp['BER'],
                 'FEC': inp['FEC'],
                 'PC': inp['PC'],
-                'MC': inp['MC'],
-                'Delay': inp['Delay'],
-                'Jitter': inp['Jitter'],
-                'HC': inp['HC']
+                'MC': inp['MC']
             }
             
             inp = reordered

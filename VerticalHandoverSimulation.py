@@ -15,7 +15,7 @@ from vhSimulator import Device
 from vhSimulator import WirelessNetworkSystem as WNS
 from vhSimulator import SPMO_Max_Min_Method as SPMO_MMM
 from vhSimulator import SPMO_Preference as SPMO_Pref
-from vhSimulator import MPMO_SAW, MPMO_WPM, MPMO_TOPSIS, MPMO_Fuzzy, MPMO_RMSE, NN_TOPSIS, NN_RL_RMSE, BenchmarkMethod, WorstScenarioMethod, PerformanceAnalysis
+from vhSimulator import MPMO_SAW, MPMO_WPM, MPMO_TOPSIS, MPMO_Fuzzy, MPMO_RMSE, NN_TOPSIS, BenchmarkMethod, WorstScenarioMethod, PerformanceAnalysis
 
 
 # ==================================== Initial Parameters ====================================
@@ -35,8 +35,8 @@ iter_interval = 1
 dist_iter = device_velocity * 0.1
 
 # n = Number of iterations, j = DO NOT CHANGE
-n = 100
 j = 0
+n = 3000
 
 # Activate Graphical Interface
 GUI = False
@@ -45,13 +45,13 @@ GUI = False
 verbose = False
 
 # Number of simulations
-n_simulations = 600
+n_simulations = 200
 
 # Iteration x Simulations
 iter_x_simu = n_simulations * n
 
 # Plot Results
-plots = False
+plots = True
 
 # Predef Configs
 predef_conf = False
@@ -63,11 +63,10 @@ corrections_real_world = True
 fading = "Rician"
 
 # Performance Analysis
-analyzed_parameters = ['RSSI', 'SNR', 'Throughput', 'PC', 'MC', 'BER', 'FEC', 'Delay', 'Jitter', 'HC']
-weights = [1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10]
-directions = [1, 1, 1, 0, 0, 0, 1, 0, 0, 0]
-
-# Improvement Techniques
+analyzed_parameters = ['RSSI', 'SNR', 'Throughput', 'PC', 'MC', 'BER', 'FEC']
+weights = [1/7, 1/7, 1/7, 1/7, 1/7, 1/7, 1/7]
+weights_total_sum = 1
+directions = [1, 1, 1, 0, 0, 0, 1]
 lockin_percentage = 0.03
 tt_trigger = 3
 hyst_percentage = 0.3
@@ -94,19 +93,17 @@ count_nn = 0
 # ===================================== MADM Algorithms ======================================
 SPMO_Methods = False
 
-SAW = False
+SAW = True
 
-WPM = False
+WPM = True
 
-TOPSIS = False
+TOPSIS = True
 
-Fuzzy = False
+Fuzzy = True
 
-RMSE = True
+RMSE = False
 
 TOPSIS_NN = False
-
-RMSE_RL_NN = True
 # ============================================================================================
 
 
@@ -131,71 +128,71 @@ def generate_random_WNS(predef):
     
     # WiFi's
     global wifi_1
-    wifi_1 = WNS("WiFi-1", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, 0.5, 0.2, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_1 = WNS("WiFi-1", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_1, 'green', 0.3])
     
     global wifi_2
-    wifi_2 = WNS("WiFi-2", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, 0.5, 0.2, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_2 = WNS("WiFi-2", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_2, 'green', 0.3])
     
     global wifi_3
-    wifi_3 = WNS("WiFi-3", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, 0.5, 0.2, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_3 = WNS("WiFi-3", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_3, 'green', 0.3])
     
     global wifi_4
-    wifi_4 = WNS("WiFi-4", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, 0.5, 0.2, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_4 = WNS("WiFi-4", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_4, 'green', 0.3])
     
     global wifi_5
-    wifi_5 = WNS("WiFi-5", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, 0.5, 0.2, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_5 = WNS("WiFi-5", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_5, 'green', 0.3])
     
     global wifi_6
-    wifi_6 = WNS("WiFi-6", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, 0.5, 0.2, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_6 = WNS("WiFi-6", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_6, 'green', 0.3])
     
     global wifi_7
-    wifi_7 = WNS("WiFi-7", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, 0.5, 0.2, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_7 = WNS("WiFi-7", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_7, 'green', 0.3])
 
     global wifi_8
-    wifi_8 = WNS("WiFi-8", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, 0.5, 0.2, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_8 = WNS("WiFi-8", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_8, 'green', 0.3])
     
     global wifi_9
-    wifi_9 = WNS("WiFi-9", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, 0.5, 0.2, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_9 = WNS("WiFi-9", random.uniform(0, x_max), random.uniform(0, y_max), 20, 5000000000, 80000000, 7, "WiFi-5GHz", 0.50, 1, maximum_radius=90, predef_throughput=[1000000000, 150000000], predef_snr=[40, 15], predef_rssi=[-50, -80], predef_ber=[0.00000001, 0.000001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_9, 'green', 0.3])
     
     global wifi_10
-    wifi_10 = WNS("WiFi-10", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, 0.5, 0.2, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_10 = WNS("WiFi-10", random.uniform(0, x_max), random.uniform(0, y_max), 20, 2400000000, 20000000, 10, "WiFi-2.4GHz", 0.50, 1, maximum_radius=150, predef_throughput=[200000000, 30000000], predef_snr=[40, 10], predef_rssi=[-50, -80], predef_ber=[0.000001, 0.0001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_10, 'green', 0.3])
 
     
     # NB-IoT
     global nbiot_1
-    nbiot_1 = WNS("NBIoT-1", random.uniform(-6*x_max, 6*x_max), random.uniform(-6*y_max, 6*y_max), 30, 800000000, 1400000, 2, "NB-IoT", 0.25, 5, 1, 0.6, maximum_radius=15000, predef_throughput=[100000, 10000], predef_snr=[10, 2], predef_rssi=[-90, -115], predef_ber=[0.00001, 0.001], predef_fec=[2/3, 1/3], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    nbiot_1 = WNS("NBIoT-1", random.uniform(-6*x_max, 6*x_max), random.uniform(-6*y_max, 6*y_max), 30, 800000000, 1400000, 2, "NB-IoT", 0.25, 5, maximum_radius=15000, predef_throughput=[100000, 10000], predef_snr=[10, 2], predef_rssi=[-90, -115], predef_ber=[0.00001, 0.001], predef_fec=[2/3, 1/3], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([nbiot_1, 'blue', 0.03])
 
 
     # LoRa's
     global LoRa_1
-    LoRa_1 = WNS("LoRa-1", random.uniform(-5*x_max, 5*x_max), random.uniform(-5*y_max, 5*y_max), 14, 868000000, 250000, 0, "LoRa-868", 0.05, 1, 2, 1, maximum_radius=10000, predef_throughput=[50000, 1000], predef_snr=[10, 0], predef_rssi=[-80, -120], predef_ber=[0.00001, 0.01], predef_fec=[4/5, 4/8], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    LoRa_1 = WNS("LoRa-1", random.uniform(-5*x_max, 5*x_max), random.uniform(-5*y_max, 5*y_max), 14, 868000000, 250000, 0, "LoRa-868", 0.05, 1, maximum_radius=10000, predef_throughput=[50000, 1000], predef_snr=[10, 0], predef_rssi=[-80, -120], predef_ber=[0.00001, 0.01], predef_fec=[4/5, 4/8], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([LoRa_1, 'yellow', 0.03])
     
     global LoRa_2
-    LoRa_2 = WNS("LoRa-2", random.uniform(-5*x_max, 5*x_max), random.uniform(-5*y_max, 5*y_max), 14, 868000000, 250000, 0, "LoRa-868", 0.05, 1, 2, 1, maximum_radius=10000, predef_throughput=[50000, 1000], predef_snr=[10, 0], predef_rssi=[-80, -120], predef_ber=[0.00001, 0.01], predef_fec=[4/5, 4/8], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    LoRa_2 = WNS("LoRa-2", random.uniform(-5*x_max, 5*x_max), random.uniform(-5*y_max, 5*y_max), 14, 868000000, 250000, 0, "LoRa-868", 0.05, 1, maximum_radius=10000, predef_throughput=[50000, 1000], predef_snr=[10, 0], predef_rssi=[-80, -120], predef_ber=[0.00001, 0.01], predef_fec=[4/5, 4/8], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([LoRa_2, 'yellow', 0.03])
 
 
     # LTE 4G
     global LTE_4g
-    LTE_4g = WNS("LTE-4g-1", random.uniform(-8*x_max, 8*x_max), random.uniform(-8*y_max, 8*y_max), 40, 1900000000, 20000000, 5, "LTE-4G", 1.05, 3, 1, 0.4, maximum_radius=30000, predef_throughput=[100000000, 5000000], predef_snr=[15, 5], predef_rssi=[-70, -100], predef_ber=[0.000001, 0.0001], predef_fec=[3/4, 1/3], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    LTE_4g = WNS("LTE-4g-1", random.uniform(-8*x_max, 8*x_max), random.uniform(-8*y_max, 8*y_max), 40, 1900000000, 20000000, 5, "LTE-4G", 1.05, 3, maximum_radius=30000, predef_throughput=[100000000, 5000000], predef_snr=[15, 5], predef_rssi=[-70, -100], predef_ber=[0.000001, 0.0001], predef_fec=[3/4, 1/3], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([LTE_4g, 'red', 0.03])
 
 
     # WiMax
     global wifi_max_1
-    wifi_max_1 = WNS("WiMax-1", random.uniform(-4*x_max, 4*x_max), random.uniform(-4*y_max, 4*y_max), 40, 3000000000, 10000000, 10, "WiMax", 0.80, 2, 1.5, 0.8, maximum_radius=6000, predef_throughput=[40000000, 2000000], predef_snr=[15, 5], predef_rssi=[-60, -90], predef_ber=[0.0000001, 0.00001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
+    wifi_max_1 = WNS("WiMax-1", random.uniform(-4*x_max, 4*x_max), random.uniform(-4*y_max, 4*y_max), 40, 3000000000, 10000000, 10, "WiMax", 0.80, 2, maximum_radius=6000, predef_throughput=[40000000, 2000000], predef_snr=[15, 5], predef_rssi=[-60, -90], predef_ber=[0.0000001, 0.00001], predef_fec=[5/6, 1/2], predef_config=predef, corrections_real_world_applications=corrections_real_world, fading=fading)
     WNS_list.append([wifi_max_1, 'purple', 0.03])
     
     
@@ -276,79 +273,51 @@ def update_position(device):
             connect_to_net(device)
             # Cleaning old QoS parameters Storaged
             if SPMO_Methods == True:
-                spmo_max_min_method_rssi.resetParameters()
-                spmo_max_min_method_snr.resetParameters()
-                spmo_pref.resetParameters()
                 p_spmo_max_min_rssi.clean_storaged_QoS()
                 p_spmo_max_min_snr.clean_storaged_QoS()
                 p_spmo_pref.clean_storaged_QoS()
             if SAW == True:
-                mpmo_saw.resetParameters()
                 p_mpmo_saw.clean_storaged_QoS()
                 if impTech_hyst == True:
-                    mpmo_saw_lockin.resetParameters()
                     p_mpmo_saw_lockin.clean_storaged_QoS()
                 if impTech_lockin == True:
-                    mpmo_saw_hyst.resetParameters()
                     p_mpmo_saw_hyst.clean_storaged_QoS()
                 if impTech_TTT == True:
-                    mpmo_saw_ttt.resetParameters()
                     p_mpmo_saw_ttt.clean_storaged_QoS()
             if WPM == True:
-                mpmo_wpm.resetParameters()
                 p_mpmo_wpm.clean_storaged_QoS()
                 if impTech_hyst == True:
-                    mpmo_wpm_hyst.resetParameters()
                     p_mpmo_wpm_hyst.clean_storaged_QoS()
                 if impTech_lockin == True:
-                    mpmo_wpm_lockin.resetParameters()
                     p_mpmo_wpm_lockin.clean_storaged_QoS()
                 if impTech_TTT == True:
-                    mpmo_wpm_ttt.resetParameters()
                     p_mpmo_wpm_ttt.clean_storaged_QoS()
             if TOPSIS == True:
-                mpmo_topsis.resetParameters()
                 p_mpmo_topsis.clean_storaged_QoS()
                 if impTech_hyst == True:
-                    mpmo_topsis_hyst.resetParameters()
                     p_mpmo_topsis_hyst.clean_storaged_QoS()
                 if impTech_lockin == True:
-                    mpmo_topsis_lockin.resetParameters()
                     p_mpmo_topsis_lockin.clean_storaged_QoS()
                 if impTech_TTT == True:
-                    mpmo_topsis_ttt.resetParameters()
                     p_mpmo_topsis_ttt.clean_storaged_QoS()
             if Fuzzy == True:
-                mpmo_fuzzy.resetParameters()
                 p_mpmo_fuzzy.clean_storaged_QoS()
                 if impTech_hyst == True:
-                    mpmo_fuzzy_hyst.resetParameters()
                     p_mpmo_fuzzy_hyst.clean_storaged_QoS()
                 if impTech_lockin == True:
-                    mpmo_fuzzy_lockin.resetParameters()
                     p_mpmo_fuzzy_lockin.clean_storaged_QoS()
                 if impTech_TTT == True:
-                    mpmo_fuzzy_ttt.resetParameters()
                     p_mpmo_fuzzy_ttt.clean_storaged_QoS()
             if RMSE == True:
-                mpmo_rmse.resetParameters()
                 p_mpmo_rmse.clean_storaged_QoS()
                 if impTech_hyst == True:
-                    mpmo_rmse_hyst.resetParameters()
                     p_mpmo_rmse_hyst.clean_storaged_QoS()
                 if impTech_lockin == True:
-                    mpmo_rmse_lockin.resetParameters()
                     p_mpmo_rmse_lockin.clean_storaged_QoS()
                 if impTech_TTT == True:
-                    mpmo_rmse_ttt.resetParameters()
                     p_mpmo_rmse_ttt.clean_storaged_QoS()
             if TOPSIS_NN == True:
-                nn_topsis.resetParameters()
                 p_nn_topsis.clean_storaged_QoS()
-            if RMSE_RL_NN == True:
-                nn_rl_rmse.resetParameters()
-                #nn_rl_rmse.resetMemory()
-                p_nn_rl_rmse.clean_storaged_QoS()
             p_benchmark.clean_storaged_QoS()
             p_worst_scenario.clean_storaged_QoS()
             # Cleaning old Benchmark QoS parameters Storaged
@@ -398,8 +367,6 @@ def update_position(device):
                     p_mpmo_rmse_ttt.clean_Benchmark_storaged_QoS()
             if TOPSIS_NN == True:
                 p_nn_topsis.clean_Benchmark_storaged_QoS()
-            if RMSE_RL_NN == True:
-                p_nn_rl_rmse.clean_Benchmark_storaged_QoS()
             p_benchmark.clean_Benchmark_storaged_QoS()
             p_worst_scenario.clean_Benchmark_storaged_QoS()
             j = 0
@@ -428,150 +395,148 @@ def calculate_parameters(device, x_position, y_position):
     if available_networks != []:
         decision_benchmark = device.makeDecision(benchmark, available_networks)
     else:
-        decision_benchmark = {'Network': 'Benchmark', 'Status': 'Offline', 'Protocol': 'Benchmark', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+        decision_benchmark = {'Network': 'Benchmark', 'Status': 'Offline', 'Protocol': 'Benchmark', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
     p_benchmark.store_QoS_parameters(decision_benchmark)
     if verbose == True: print(f"Benchmark {decision_benchmark}")
         
     # ============================== Worst Scenario ==============================
     if available_networks != []:
         decision_worst_scenario = device.makeDecision(worst_scenario, available_networks)
-        if len(available_networks) >= 1:
-            decision_worst_scenario['HC'] = 1
     else:
-        decision_worst_scenario = {'Network': 'WorstScenario', 'Status': 'Offline', 'Protocol': 'WorstScenario', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+        decision_worst_scenario = {'Network': 'WorstScenario', 'Status': 'Offline', 'Protocol': 'WorstScenario', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
     p_worst_scenario.store_QoS_parameters(decision_worst_scenario)
     p_worst_scenario.store_Benchmark_QoS_parameters(decision_benchmark)
     if verbose == True: print(f"Worst Scenario: {decision_worst_scenario}")
     
     if SPMO_Methods == True:
         if available_networks != []:
-            decision_spmo_mmm_rssi = device.makeDecision(spmo_max_min_method_rssi, available_networks, hidden_parameters=True)
+            decision_spmo_mmm_rssi = device.makeDecision(spmo_max_min_method_rssi, available_networks)
         else:
-            decision_spmo_mmm_rssi = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_spmo_mmm_rssi = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_spmo_max_min_rssi.store_QoS_parameters(decision_spmo_mmm_rssi)
         p_spmo_max_min_rssi.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision SPMO MAX MIN RSSI: {decision_spmo_mmm_rssi}")
         
         if available_networks != []:
-            decision_spmo_mmm_snr = device.makeDecision(spmo_max_min_method_snr, available_networks, hidden_parameters=True)
+            decision_spmo_mmm_snr = device.makeDecision(spmo_max_min_method_snr, available_networks)
         else:
-            decision_spmo_mmm_snr = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_spmo_mmm_snr = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_spmo_max_min_snr.store_QoS_parameters(decision_spmo_mmm_snr)
         p_spmo_max_min_snr.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision SPMO MAX MIN SNR: {decision_spmo_mmm_snr}")
         
         if available_networks != []:
-            decision_spmo_pref = device.makeDecision(spmo_pref, available_networks, hidden_parameters=True)
+            decision_spmo_pref = device.makeDecision(spmo_pref, available_networks)
         else:
-            decision_spmo_pref = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_spmo_pref = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_spmo_pref.store_QoS_parameters(decision_spmo_pref)
         p_spmo_pref.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision SPMO Preference: {decision_spmo_pref}")
     
     if SAW == True:
         if available_networks != []:
-            decision_mpmo_saw = device.makeDecision(mpmo_saw, available_networks, hidden_parameters=True)
+            decision_mpmo_saw = device.makeDecision(mpmo_saw, available_networks)
         else:
-            decision_mpmo_saw = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_mpmo_saw = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_mpmo_saw.store_QoS_parameters(decision_mpmo_saw)
         p_mpmo_saw.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision MPMO SAW: {decision_mpmo_saw}")
         
         if impTech_hyst == True:
             if available_networks != []:
-                decision_mpmo_saw_hyst = device.makeDecision(mpmo_saw_hyst, available_networks, hidden_parameters=True)
+                decision_mpmo_saw_hyst = device.makeDecision(mpmo_saw_hyst, available_networks)
             else:
-                decision_mpmo_saw_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_saw_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_saw_hyst.store_QoS_parameters(decision_mpmo_saw_hyst)
             p_mpmo_saw_hyst.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO SAW Hysteresis: {decision_mpmo_saw_hyst}")
         
         if impTech_lockin == True:
             if available_networks != []:
-                decision_mpmo_saw_lockin = device.makeDecision(mpmo_saw_lockin, available_networks, hidden_parameters=True)
+                decision_mpmo_saw_lockin = device.makeDecision(mpmo_saw_lockin, available_networks)
             else:
-                decision_mpmo_saw_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_saw_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_saw_lockin.store_QoS_parameters(decision_mpmo_saw_lockin)
             p_mpmo_saw_lockin.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO SAW LockIn: {decision_mpmo_saw_lockin}")
         
         if impTech_TTT == True:
             if available_networks != []:
-                decision_mpmo_saw_ttt = device.makeDecision(mpmo_saw_ttt, available_networks, hidden_parameters=True)
+                decision_mpmo_saw_ttt = device.makeDecision(mpmo_saw_ttt, available_networks)
             else:
-                decision_mpmo_saw_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_saw_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_saw_ttt.store_QoS_parameters(decision_mpmo_saw_ttt)
             p_mpmo_saw_ttt.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO SAW Time to Trigger: {decision_mpmo_saw_ttt}")
     
     if WPM == True:
         if available_networks != []:
-            decision_mpmo_wpm = device.makeDecision(mpmo_wpm, available_networks, hidden_parameters=True)
+            decision_mpmo_wpm = device.makeDecision(mpmo_wpm, available_networks)
         else:
-            decision_mpmo_wpm = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_mpmo_wpm = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_mpmo_wpm.store_QoS_parameters(decision_mpmo_wpm)
         p_mpmo_wpm.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision MPMO WPM: {decision_mpmo_wpm}")
         
         if impTech_hyst == True:
             if available_networks != []:
-                decision_mpmo_wpm_hyst = device.makeDecision(mpmo_wpm_hyst, available_networks, hidden_parameters=True)
+                decision_mpmo_wpm_hyst = device.makeDecision(mpmo_wpm_hyst, available_networks)
             else:
-                decision_mpmo_wpm_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_wpm_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_wpm_hyst.store_QoS_parameters(decision_mpmo_wpm_hyst)
             p_mpmo_wpm_hyst.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO WPM Hyst: {decision_mpmo_wpm_hyst}")
         
         if impTech_lockin == True:
             if available_networks != []:
-                decision_mpmo_wpm_lockin = device.makeDecision(mpmo_wpm_lockin, available_networks, hidden_parameters=True)
+                decision_mpmo_wpm_lockin = device.makeDecision(mpmo_wpm_lockin, available_networks)
             else:
-                decision_mpmo_wpm_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_wpm_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_wpm_lockin.store_QoS_parameters(decision_mpmo_wpm_lockin)
             p_mpmo_wpm_lockin.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO WPM LockIn: {decision_mpmo_wpm_lockin}")
         
         if impTech_TTT == True:
             if available_networks != []:
-                decision_mpmo_wpm_ttt = device.makeDecision(mpmo_wpm_ttt, available_networks, hidden_parameters=True)
+                decision_mpmo_wpm_ttt = device.makeDecision(mpmo_wpm_ttt, available_networks)
             else:
-                decision_mpmo_wpm_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_wpm_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_wpm_ttt.store_QoS_parameters(decision_mpmo_wpm_ttt)
             p_mpmo_wpm_ttt.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO WPM Time to Trigger: {decision_mpmo_wpm_ttt}")
     
     if TOPSIS == True:
         if available_networks != []:
-            decision_mpmo_topsis = device.makeDecision(mpmo_topsis, available_networks, hidden_parameters=True)
+            decision_mpmo_topsis = device.makeDecision(mpmo_topsis, available_networks)
         else:
-            decision_mpmo_topsis = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_mpmo_topsis = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_mpmo_topsis.store_QoS_parameters(decision_mpmo_topsis)
         p_mpmo_topsis.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision MPMO TOPSIS: {decision_mpmo_topsis}")
         
         if impTech_hyst == True:
             if available_networks != []:
-                decision_mpmo_topsis_hyst = device.makeDecision(mpmo_topsis_hyst, available_networks, hidden_parameters=True)
+                decision_mpmo_topsis_hyst = device.makeDecision(mpmo_topsis_hyst, available_networks)
             else:
-                decision_mpmo_topsis_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_topsis_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_topsis_hyst.store_QoS_parameters(decision_mpmo_topsis_hyst)
             p_mpmo_topsis_hyst.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO TOPSIS Hyst: {decision_mpmo_topsis_hyst}")
         
         if impTech_lockin == True:
             if available_networks != []:
-                decision_mpmo_topsis_lockin = device.makeDecision(mpmo_topsis_lockin, available_networks, hidden_parameters=True)
+                decision_mpmo_topsis_lockin = device.makeDecision(mpmo_topsis_lockin, available_networks)
             else:
-                decision_mpmo_topsis_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_topsis_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_topsis_lockin.store_QoS_parameters(decision_mpmo_topsis_lockin)
             p_mpmo_topsis_lockin.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO TOPSIS LockIn: {decision_mpmo_topsis_lockin}")
         
         if impTech_TTT == True:
             if available_networks != []:
-                decision_mpmo_topsis_ttt = device.makeDecision(mpmo_topsis_ttt, available_networks, hidden_parameters=True)
+                decision_mpmo_topsis_ttt = device.makeDecision(mpmo_topsis_ttt, available_networks)
             else:
-                decision_mpmo_topsis_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_topsis_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_topsis_ttt.store_QoS_parameters(decision_mpmo_topsis_ttt)
             p_mpmo_topsis_ttt.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO TOPSIS Time to Trigger: {decision_mpmo_topsis_ttt}")
@@ -579,36 +544,36 @@ def calculate_parameters(device, x_position, y_position):
     if Fuzzy == True:
         
         if available_networks != []:
-            decision_mpmo_fuzzy = device.makeDecision(mpmo_fuzzy, available_networks, hidden_parameters=True)
+            decision_mpmo_fuzzy = device.makeDecision(mpmo_fuzzy, available_networks)
         else:
-            decision_mpmo_fuzzy = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_mpmo_fuzzy = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_mpmo_fuzzy.store_QoS_parameters(decision_mpmo_fuzzy)
         p_mpmo_fuzzy.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision MPMO Fuzzy: {decision_mpmo_fuzzy}")
         
         if impTech_hyst == True:
             if available_networks != []:
-                decision_mpmo_fuzzy_hyst = device.makeDecision(mpmo_fuzzy_hyst, available_networks, hidden_parameters=True)
+                decision_mpmo_fuzzy_hyst = device.makeDecision(mpmo_fuzzy_hyst, available_networks)
             else:
-                decision_mpmo_fuzzy_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_fuzzy_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_fuzzy_hyst.store_QoS_parameters(decision_mpmo_fuzzy_hyst)
             p_mpmo_fuzzy_hyst.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO Fuzzy Hyst: {decision_mpmo_fuzzy_hyst}")
         
         if impTech_lockin == True:
             if available_networks != []:
-                decision_mpmo_fuzzy_lockin = device.makeDecision(mpmo_fuzzy_lockin, available_networks, hidden_parameters=True)
+                decision_mpmo_fuzzy_lockin = device.makeDecision(mpmo_fuzzy_lockin, available_networks)
             else:
-                decision_mpmo_fuzzy_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_fuzzy_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_fuzzy_lockin.store_QoS_parameters(decision_mpmo_fuzzy_lockin)
             p_mpmo_fuzzy_lockin.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO Fuzzy LockIn: {decision_mpmo_fuzzy_lockin}")
         
         if impTech_TTT == True:
             if available_networks != []:
-                decision_mpmo_fuzzy_ttt = device.makeDecision(mpmo_fuzzy_ttt, available_networks, hidden_parameters=True)
+                decision_mpmo_fuzzy_ttt = device.makeDecision(mpmo_fuzzy_ttt, available_networks)
             else:
-                decision_mpmo_fuzzy_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_fuzzy_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_fuzzy_ttt.store_QoS_parameters(decision_mpmo_fuzzy_ttt)
             p_mpmo_fuzzy_ttt.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO Fuzzy Time to Trigger: {decision_mpmo_fuzzy_ttt}")
@@ -616,36 +581,36 @@ def calculate_parameters(device, x_position, y_position):
     if RMSE == True:
         
         if available_networks != []:
-            decision_mpmo_rmse = device.makeDecision(mpmo_rmse, available_networks, hidden_parameters=True)
+            decision_mpmo_rmse = device.makeDecision(mpmo_rmse, available_networks)
         else:
-            decision_mpmo_rmse = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_mpmo_rmse = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_mpmo_rmse.store_QoS_parameters(decision_mpmo_rmse)
         p_mpmo_rmse.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision MPMO RMSE: {decision_mpmo_rmse}")
         
         if impTech_hyst == True:
             if available_networks != []:
-                decision_mpmo_rmse_hyst = device.makeDecision(mpmo_rmse_hyst, available_networks, hidden_parameters=True)
+                decision_mpmo_rmse_hyst = device.makeDecision(mpmo_rmse_hyst, available_networks)
             else:
-                decision_mpmo_rmse_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_rmse_hyst = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_rmse_hyst.store_QoS_parameters(decision_mpmo_rmse_hyst)
             p_mpmo_rmse_hyst.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO RMSE Hyst: {decision_mpmo_rmse_hyst}")
         
         if impTech_lockin == True:
             if available_networks != []:
-                decision_mpmo_rmse_lockin = device.makeDecision(mpmo_rmse_lockin, available_networks, hidden_parameters=True)
+                decision_mpmo_rmse_lockin = device.makeDecision(mpmo_rmse_lockin, available_networks)
             else:
-                decision_mpmo_rmse_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_rmse_lockin = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_rmse_lockin.store_QoS_parameters(decision_mpmo_rmse_lockin)
             p_mpmo_rmse_lockin.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO RMSE LockIn: {decision_mpmo_rmse_lockin}")
         
         if impTech_TTT == True:
             if available_networks != []:
-                decision_mpmo_rmse_ttt = device.makeDecision(mpmo_rmse_ttt, available_networks, hidden_parameters=True)
+                decision_mpmo_rmse_ttt = device.makeDecision(mpmo_rmse_ttt, available_networks)
             else:
-                decision_mpmo_rmse_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+                decision_mpmo_rmse_ttt = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
             p_mpmo_rmse_ttt.store_QoS_parameters(decision_mpmo_rmse_ttt)
             p_mpmo_rmse_ttt.store_Benchmark_QoS_parameters(decision_benchmark)
             if verbose == True: print(f"Decision MPMO RMSE Time to Trigger: {decision_mpmo_rmse_ttt}")
@@ -653,22 +618,12 @@ def calculate_parameters(device, x_position, y_position):
     if TOPSIS_NN == True:
     
         if available_networks != []:
-            decision_nn_topsis = device.makeDecision(nn_topsis, available_networks, hidden_parameters=True)
+            decision_nn_topsis = device.makeDecision(nn_topsis, available_networks)
         else:
-            decision_nn_topsis = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
+            decision_nn_topsis = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0}
         p_nn_topsis.store_QoS_parameters(decision_nn_topsis)
         p_nn_topsis.store_Benchmark_QoS_parameters(decision_benchmark)
         if verbose == True: print(f"Decision NN TOPSIS: {decision_nn_topsis}")
-    
-    if RMSE_RL_NN == True:
-    
-        if available_networks != []:
-            decision_nn_rl_rmse = device.makeDecision(nn_rl_rmse, available_networks, hidden_parameters=True)
-        else:
-            decision_nn_rl_rmse = {'Network': 'Offline', 'Status': 'Offline', 'Protocol': 'Offline', 'RSSI': 0, 'SNR': 0, 'Throughput': 0, 'PC': 0, 'MC': 0, 'BER': 0, 'FEC': 0, 'Delay': 0, 'Jitter': 0, 'HC': 0}
-        p_nn_rl_rmse.store_QoS_parameters(decision_nn_rl_rmse)
-        p_nn_rl_rmse.store_Benchmark_QoS_parameters(decision_benchmark)
-        if verbose == True: print(f"Decision NN RL RMSE: {decision_nn_rl_rmse}")
     
     #global count_nn
     #if decision_nn_topsis == decision_mpmo_topsis: count_nn = count_nn + 1
@@ -899,15 +854,6 @@ def performe_analysis():
         indicators_list.append(indicators_nn_topsis)
         results_list.append(results_nn_topsis)
     
-    if RMSE_RL_NN == True: 
-        results_nn_rl_rmse = p_nn_rl_rmse.calculate_average_QoS_parameters(analyzed_parameters)
-        results_nn_rl_rmse['Handover'] = p_nn_rl_rmse.count_number_of_handovers()
-        results_nn_rl_rmse['Algorithm'] = p_nn_rl_rmse.algorithm
-        indicators_nn_rl_rmse = p_nn_rl_rmse.calculate_Abs_error_QoS_parameters(analyzed_parameters)
-        indicators_nn_rl_rmse['Algorithm'] = results_nn_rl_rmse['Algorithm']
-        indicators_list.append(indicators_nn_rl_rmse)
-        results_list.append(results_nn_rl_rmse)
-    
     indicators_worst_scenario = p_worst_scenario.calculate_Abs_error_QoS_parameters(analyzed_parameters)
     indicators_worst_scenario['Algorithm'] = p_worst_scenario.algorithm
     indicators_list.append(indicators_worst_scenario)
@@ -965,8 +911,6 @@ def performe_analysis():
             print(f"{results_mpmo_rmse_ttt}, Handoff: {results_mpmo_rmse_ttt['Handover']}")
     if TOPSIS_NN == True: 
         print(f"{results_nn_topsis}, Handoff: {results_nn_topsis['Handover']}")
-    if RMSE_RL_NN == True: 
-        print(f"{results_nn_rl_rmse}, Handoff: {results_nn_rl_rmse['Handover']}")
     print(f"{results_benchmark}, Handoff: {results_benchmark['Handover']}")
     print("========================================================================================================================")
     
@@ -976,7 +920,7 @@ def performe_analysis():
 
 
 def plot_results():
-    global final_results, analyzed_parameters, indicators_results, iter_x_simu
+    global final_results, analyzed_parameters, weights_total_sum, indicators_results, iter_x_simu
     analyzed_parameters.append("Handover")
     
     # Initialize aggregation storage
@@ -1006,10 +950,61 @@ def plot_results():
     
     
     
-    # Safe RMSE RL Model
-    nn_rl_rmse.saveModel()
-    
     # ==================================================== Start - RMSE Analisys ====================================================
+    print("========================================================================================================================")
+    print("Indicators to Measure Deviation from a Benchmark")
+
+    # Initialize a dictionary to store the summed values
+    aggregated_results_rmse = {}
+    
+    # To use in 3D SSM
+    SSE_3D_Graph = {}
+
+    # Loop through each list in the indicators_results
+    #print(f"Indicator Results: {indicators_results}")
+    
+    #print(f"Indicators Results: {indicators_results}")
+    
+    for group in indicators_results:
+        for entry in group:
+            algorithm = entry['Algorithm']
+
+            if algorithm != 'Worst-Scenario':
+                if algorithm not in aggregated_results_rmse:
+                    aggregated_results_rmse[algorithm] = {param: 0 for param in entry if param != 'Algorithm'}
+                
+                for param in entry:
+                    if param != 'Algorithm':
+                        aggregated_results_rmse[algorithm][param] += sum([x**2 for x in entry[param]])
+
+    
+    SSE_3D_Graph = aggregated_results_rmse
+    for agg in aggregated_results_rmse:
+        for parm in aggregated_results_rmse[agg]:
+            aggregated_results_rmse[agg][parm] = (aggregated_results_rmse[agg][parm] / iter_x_simu)**(1/2)
+    
+    
+    print(f"Aggregated results: {aggregated_results_rmse}")
+    
+    # Print the aggregated results
+    ind_dict = {}
+    for algorithm, values in aggregated_results_rmse.items():
+        for param, value in values.items():
+            ind_dict[param] = []
+            
+    for algorithm, values in aggregated_results_rmse.items():
+        print(f"Algorithm: {algorithm}")
+        for param, value in values.items():
+            ind_dict[param].append(value)
+            print(f"RMSE: {param}: {value}")
+        print("-" * 50)
+    
+    print("RMSE of the Normalized Results")
+    normalized_rsme = {
+        k: [(v_i-min(v)) / (max(v)-min(v)) for v_i in v]
+        for k, v in ind_dict.items()
+    }
+    print(normalized_rsme)
     
     simulations = indicators_results
     simulations_aux_max = []
@@ -1057,6 +1052,7 @@ def plot_results():
         cleaned_data.append(new_group)   
     simulations = cleaned_data
     
+
     i = 0
     for sim in simulations:
         j = 0
@@ -1065,13 +1061,14 @@ def plot_results():
                 if param != 'Algorithm':
                     k = 0
                     for value in values_list:
-                        if simulations_aux_max[i][param][k] - simulations_aux_min[i][param][k] == 0:
+                        if simulations_aux_max[i][param][k] == 0:
                             simulations[i][j][param][k] = 0
                         else:
-                            simulations[i][j][param][k] = (simulations[i][j][param][k] - simulations_aux_min[i][param][k]) / (simulations_aux_max[i][param][k] - simulations_aux_min[i][param][k])
+                            simulations[i][j][param][k] = (simulations[i][j][param][k]) / (simulations_aux_max[i][param][k])
                         k = k + 1
             j = j + 1
         i = i + 1
+
     
     rmse_simulations = []
     for sim in simulations:
@@ -1091,15 +1088,11 @@ def plot_results():
     for rmse_simu in rmse_simulations:
         rsme_list_results = []
         for algo in rmse_simu:
-            rmse_results = [(x / (len(simulations[0][0])-1))**(1/2) for x in algo]
+            rmse_results = [(x / weights_total_sum)**(1/2) for x in algo]
             rsme_list_results.append(rmse_results)
             
         rsme_final_results.append(rsme_list_results)
-    
-    #print("========================================================================================================================")
-    #print(rsme_final_results)
-    #print("========================================================================================================================")
-
+        
     i = 0
     for sum_result_list in rsme_final_results:
         j = 0
@@ -1107,12 +1100,7 @@ def plot_results():
             rsme_final_results[i][j] = sum(rsme_final_results[i][j])
             j = j + 1
         i = i + 1
-        
-    #print("========================================================================================================================")
-    #print(rsme_final_results)
-    #print("========================================================================================================================")
-    
-    
+
     results_sim_sum = [0] * len(rsme_final_results[0])
     for simu_sum in rsme_final_results:
         j = 0
@@ -1121,14 +1109,14 @@ def plot_results():
             j = j + 1
     
     print("========================================================================================================================")
-    print(f"RMSE of each Decision Maker: {results_sim_sum}")
+    print(results_sim_sum)
 
     x_min = min(results_sim_sum)
     x_max = max(results_sim_sum)
     rmse_per_index = [(x - x_min) / (x_max - x_min) for x in results_sim_sum]
 
     print("========================================================================================================================")
-    print(f"RMSE of each Decision Maker Normalized: {rmse_per_index}")
+    print(f"RMSE of each Decision Maker: {rmse_per_index}")
     print("========================================================================================================================")
     print(f"Best option using RMSE: {rmse_per_index.index(min(rmse_per_index))}")
     print("========================================================================================================================")
@@ -1228,8 +1216,8 @@ def plot_results():
                 ax = axes[i]
                 
                 # 4 METHODS
-                #hatches = ['', '', '', '', '']
-                #bars = ax.bar(labels, values, color=["blue", "orange", "green", "red", "black"], edgecolor='black', linewidth=1.2)
+                hatches = ['', '', '', '', '']
+                bars = ax.bar(labels, values, color=["blue", "orange", "green", "red", "black"], edgecolor='black', linewidth=1.2)
                 
                 # SPMO + 4 METHODS
                 #hatches = ['', '', '', '', '', '', '', '']
@@ -1248,8 +1236,8 @@ def plot_results():
                 #bars = ax.bar(labels, values, color=["blue", "orange", "green", "red", "purple", "black"], edgecolor='black', linewidth=1.2)
                 
                 # TOPSIS + TOPSIS NN
-                hatches = ['', '']
-                bars = ax.bar(labels, values, color=["blue", "orange", "black"], edgecolor='black', linewidth=1.2)
+                #hatches = ['', '']
+                #bars = ax.bar(labels, values, color=["blue", "orange", "black"], edgecolor='black', linewidth=1.2)
                 
                 # Apply hatch patterns to each bar
                 for bar, hatch in zip(bars, hatches):
@@ -1370,8 +1358,6 @@ if RMSE == True:
         mpmo_rmse_ttt = MPMO_RMSE("MPMO-RMSE-TimeToTrigger", analyzed_parameters, weights, directions, time_to_trigger=tt_trigger)
 if TOPSIS_NN == True: 
     nn_topsis = NN_TOPSIS("NN-TOPSIS", analyzed_parameters)
-if RMSE_RL_NN == True:
-    nn_rl_rmse = NN_RL_RMSE("NN-RL_RMSE", analyzed_parameters, simulation_length=n) # model_name="RMSE_RL_14inps_32_16.keras"
 benchmark = BenchmarkMethod("Benchmark", analyzed_parameters, directions)
 worst_scenario = WorstScenarioMethod("Worst-Scenario", analyzed_parameters, directions)
 
@@ -1422,8 +1408,6 @@ if RMSE == True:
         p_mpmo_rmse_ttt = PerformanceAnalysis("RMSE-TTT")
 if TOPSIS_NN == True: 
     p_nn_topsis = PerformanceAnalysis("NN-TOPSIS")
-if RMSE_RL_NN == True: 
-    p_nn_rl_rmse = PerformanceAnalysis("NN-RL-RMSE")
 p_benchmark = PerformanceAnalysis("Benchmark")
 p_worst_scenario = PerformanceAnalysis("Worst-Scenario")
 
